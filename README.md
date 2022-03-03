@@ -18,6 +18,6 @@ $ cd build
 $ cmake ..
 $ cmake --build .
 $ ./wat2wasm gol.wat
-$ sha1sum gol.wat
+$ sha1sum gol.wasm
 61ec7d19334b97c0c2fb3e7d901a5e96fd480726  gol.wasm
 ```
