@@ -47,11 +47,4 @@ void request_core1_callback_at(void* func, unsigned int at);
 	Following operation must be as quick as possible.
 
 */
-	
 void wait_core1_busy(void);
-
-/*
-	Static variables.
-	"1w0r" variables are written by core1 and read by core0
-	"0w1r" variables are written by core0 and read by core1
-*/
