@@ -9,23 +9,30 @@
 #include "pico/multicore.h"
 
 void core1_entry() {
-	static int i=1000;
-	multicore_fifo_push_blocking(i++);
-	printf("Hello, core1: %d!\n",multicore_fifo_pop_blocking());
+	int i,t;
+	t=time_us_32();
+	for(i=0;i<0xffffff;i++) asm volatile("nop");
+	multicore_fifo_push_blocking(time_us_32()-t);
+	while (true) {
+		sleep_ms(1000);
+	}
 }
 
 int main() {
-	int i=2000;
+	int i,t;
 	stdio_init_all();
 	sleep_ms(3000);
 	printf("Hello, multicore world!\n");
+	t=time_us_32();
+	for(i=0;i<0xffffff;i++) asm volatile("nop");
+	printf("Hello, core0 only: %d!\n",time_us_32()-t);
+	multicore_launch_core1(core1_entry);
+	t=time_us_32();
+	for(i=0;i<0xffffff;i++) asm volatile("nop");
+	printf("Hello, core0: %d!\n",time_us_32()-t);
+	printf("Hello, core1: %d!\n",multicore_fifo_pop_blocking());	
 	while (true) {
 		sleep_ms(1000);
-		multicore_reset_core1();
-		multicore_launch_core1(core1_entry);
-		multicore_fifo_push_blocking(i++); // This function must be called after calling multicore_launch_core1()
-		sleep_ms(1000);
-		printf("Hello, core0: %d!\n",multicore_fifo_pop_blocking());
 	}
 	return 0;
 }
