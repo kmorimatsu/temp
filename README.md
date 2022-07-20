@@ -1,7 +1,6 @@
-# Temp
-Temporary git archive
+# kmbasictiny
+Git archive for KM-BASIC tiny
 
-## about Temp
+## KM-BASIC tiny
 
-Currently testing the following wepage codes
-https://www.kabuku.co.jp/developers/webassembly
+This is tiny version of KM-BASIC for ARM
