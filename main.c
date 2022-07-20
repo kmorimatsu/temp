@@ -89,6 +89,10 @@ void command_error(void){
 	printf("  Valid commands: TYPE, LIST, and RUN\n");
 }
 
+void __attribute__ ((noinline)) command_assembler(void){
+	asm ("nop");
+}
+
 int main() {
 	char* command;
 	stdio_init_all();
@@ -105,6 +109,7 @@ int main() {
 		else if (!strcmp(command,"TYPE") || !strcmp(command,"type")) command_type();
 		else if (!strcmp(command,"LIST") || !strcmp(command,"list")) command_list();
 		else if (!strcmp(command,"RUN") || !strcmp(command,"run")) command_run();
+		else if (!strcmp(command,"\x08 dummy assembler")) command_assembler();
 		else command_error();
 	}
 	return 0;
