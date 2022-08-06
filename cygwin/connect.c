@@ -275,6 +275,7 @@ void wait4command(const char* command){
 	char buf[1024];
 	char request[16];
 	int fd=g_serial_handle;
+	int echo=strcmp(command,"MACHIKAP\x08\x08\x08\x08\x08\x08\x08\x08");
 	while(1){
 		usleep(1000);
 		i=read(fd, buf, sizeof buf);
@@ -285,7 +286,7 @@ void wait4command(const char* command){
 			g_serial_handle=fd;
 		}
 		for(j=0;j<i;j++) {
-			putchar(buf[j]);
+			if (echo) putchar(buf[j]);
 			memmove(request,request+1,15);
 			request[15]=buf[j];
 			if (!strncmp(request,command,16)) return;
@@ -310,6 +311,7 @@ void serialtest(void){
 
 	while(1){
 		// This is the main loop
+		printf("Waiting for request...\n");
 		wait4command("MACHIKAP\x08\x08\x08\x08\x08\x08\x08\x08");
 		printf("Request detected!\n");
 		write(fd,"OK\x08\x08OK\x08\x08OK\x08\x08OK\x08\x08",16);
@@ -318,6 +320,8 @@ void serialtest(void){
 		printf("OK      \n");
 		listfiles(g_dir_root,copyfile_callback);
 		write(fd,"DONEDONE\x08\x08\x08\x08\x08\x08\x08\x08",16);
+		wait4command("ALL DONE\x08\x08\x08\x08\x08\x08\x08\x08");
+		printf("All done!\n");
  	}
 }
 

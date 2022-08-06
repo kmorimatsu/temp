@@ -82,7 +82,7 @@ void pc_connected(void){
 		if (!strncmp(command,"DONEDONE\x08\x08\x08\x08\x08\x08\x08\x08",16)) {
 			// All done
 			f_chdir("/");
-			printf("done!   \n");
+			printf("ALL DONE\x08\x08\x08\x08\x08\x08\x08\x08");
 			return;
 		} else if (!strncmp(command,"CD:",3)) {
 			// Change directory
