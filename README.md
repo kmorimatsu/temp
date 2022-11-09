@@ -3,5 +3,4 @@ Temporary git archive
 
 ## about Temp
 
-Currently testing the following wepage codes
-https://www.kabuku.co.jp/developers/webassembly
+Currently testing the convert.php for embedding C code in MachiKania BASIC
