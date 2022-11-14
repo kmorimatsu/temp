@@ -9,15 +9,16 @@ class configclass{
 	public $dis_file='./build/hello_usb.dis';
 	public $map_file='./build/hello_usb.elf.map';
 	public $hex_file='./build/hello_usb.hex';
+	public $debug_file='./machikap/machikap.bas';
 	
 	// Functions to be exported
 	public $functions=array(
 		'machikania_init',
-//		'regcomp',
-//		'regexec',
-//		'regsub',
-		'printstr',
-		'test',
+		'regcomp',
+		'regexec',
+		'regsub',
+//		'printstr',
+//		'test',
 	);
 	
 	// Additional .rodata to be used (function names are excluded)
@@ -35,7 +36,7 @@ class configclass{
 */
 
 class mainclass {
-	private $config;
+	public $config;
 	private $dis_file;
 	private $map_file;
 	private $hex_file;
@@ -48,6 +49,7 @@ class mainclass {
 	private $rodatacode=array();
 	private $ramfuncvectors=array();
 	private $ramvectors=array();
+	private $callbackvectors=array();
 	private $functions,$donefunctions;
 	private $start=0xffffffff;
 	private $end=0;
@@ -102,8 +104,11 @@ class mainclass {
 		ob_end_flush();
 		//*/
 		
+		ob_start();
 		$this->linkBL();
 		$this->addCodes();
+		$this->log.=ob_get_contents();
+		ob_end_flush();
 	}
 	
 	/*
@@ -207,6 +212,13 @@ class mainclass {
 		return 0;
 	}
 	
+	function checkIfCallback($addr){
+		if (!($addr&1)) return 0;
+		$addr-=1;
+		if (!preg_match('/[\r\n]'.dechex($addr).' <([^>]+)>:[\r\n]/',$this->dis_file,$m)) return 0;
+		return $m[1];
+	}
+	
 	private $ramdata;
 	function checkIfRAM($addr){
 		if ($addr<0x20000000 || 0x20040000<=$addr) return 0;
@@ -246,6 +258,7 @@ class mainclass {
 				'codestart'=>2*count($this->funccode)
 			);
 		// Create function code
+		echo 'C_FUNCTIONS+',2*count($this->funccode),"\n";
 		$funccode_start=2*count($this->funccode);
 		for($i=$addr;$i<$end;$i+=4){
 			$this->funccode[]=$this->bin[$i+0] | ($this->bin[$i+1]<<8);
@@ -258,10 +271,21 @@ class mainclass {
 			for($i=0;$i<count($m[0]);$i++){
 				if ($m[2][$i]!=$m[3][$i]) continue;
 				$val=hexdec($m[2][$i]);
-				if ($this->checkIfRodata($val)) {
+				if ($cb=$this->checkIfCallback($val)) {
+					echo "at: ",$m[1][$i],", callback: ",$cb;
+					$this->callbackvectors[hexdec($m[1][$i])-$addr+$funccode_start]=$cb;
+					if (!in_array($cb,$this->functions) && !in_array($cb,$this->donefunctions)) {
+						echo ' (additional function)';
+						$this->functions[]=$cb;
+					}
+					echo "\n";
+				} else if ($this->checkIfRodata($val)) {
 					echo "at: ",$m[1][$i],", .rodata: 0x",$m[2][$i],"\n";
 					$this->rodatavectors[hexdec($m[1][$i])-$addr+$funccode_start]=$val;
 				} else if (substr($m[2][$i],0,3)=='200') {
+					if (isset($this->bin[$val])) {
+						echo 'Using RAM function area: 0x'.dechex($val)."\n";
+					}
 					if ($this->checkIfRAM($val)) {
 						$t=$this->checkIfRAMcode($val);
 						if ($t) {
@@ -306,6 +330,7 @@ class mainclass {
 	}
 	
 	function linkBL(){
+		echo "List of BL instructions\n";
 		foreach($this->bllist as $pos=>$func){
 			$from=$pos+4;
 			$to=$this->funcsneeded[$func]['codestart'];
@@ -315,6 +340,7 @@ class mainclass {
 			$bl1=0xf000 | ($d&0x7ff);
 			$this->funccode[$pos/2]=$bl1;
 			$this->funccode[$pos/2+1]=$bl2;
+			echo '$',dechex($bl1),',$',dechex($bl2),': at C_FUNCTIONS+',$pos,' to C_FUNCTIONS+',$to,"\n";
 		}
 	}
 	
@@ -366,6 +392,12 @@ class mainclass {
 			$code.="  POKE32 DATAADDRESS(C_FUNCTIONS)+$vector,DATAADDRESS(C_FUNCTIONS)+".
 				($this->funcsneeded[$func['func']]['codestart']+$func['16bit'])."\n";
 		}
+		// Add callback function vectors
+		$code.="  REM callback function vectors\n";
+		foreach($this->callbackvectors as $vector=>$func) {
+			$code.="  POKE32 DATAADDRESS(C_FUNCTIONS)+$vector,DATAADDRESS(C_FUNCTIONS)+".
+				($this->funcsneeded[$func]['codestart']+1)."\n";
+		}		
 		// Call machikania_init if exists
 		if (isset($this->funcsneeded['machikania_init'])) {
 			$code.="  REM Initialize C global variables\n";
@@ -439,6 +471,12 @@ class mainclass {
 $o=new mainclass;
 file_put_contents('./log.txt',$o->log);
 file_put_contents('./result.txt',$o->code);
+if (isset($o->config->debug_file)) {
+	$result=file_get_contents($o->config->debug_file);
+	$result=substr($result,0,strpos($result,'LABEL INIT_C'));
+	$result.=substr($o->code,strpos($o->code,'LABEL INIT_C'));
+	file_put_contents($o->config->debug_file,$result);
+}
 
 /*
 	TODO:
