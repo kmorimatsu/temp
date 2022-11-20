@@ -37,13 +37,17 @@ char *dest;
 	while ((c = *src++) != '\0') {
 		if (c == '&')
 			no = 0;
-		else if (c == '\\' && isdigit(*src))
+		// Modified a line for MachiKania
+		// else if (c == '\\' && isdigit(*src))
+		else if (c == '$' && isdigit(*src))
 			no = *src++ - '0';
 		else
 			no = -1;
 
 		if (no < 0) {	/* Ordinary character. */
-			if (c == '\\' && (*src == '\\' || *src == '&'))
+			// Modified a line for MachiKania
+			// if (c == '\\' && (*src == '\\' || *src == '&'))
+			if (c == '\\' && (*src == '\\' || *src == '&' || *src == '$'))
 				c = *src++;
 			*dst++ = c;
 		} else if (prog->startp[no] != NULL && prog->endp[no] != NULL &&

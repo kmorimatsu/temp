@@ -483,7 +483,13 @@ int *flagp;
 		break;
 		}
 	case '(':
-		ret = reg(cp, 1, &flags);
+		// Inserted 5 lines for MachiKania
+		if ('?'==cp->regparse[0] && ':'==cp->regparse[1]) {
+			cp->regparse+=2;
+			ret = reg(cp, 1, &flags);
+			cp->regnpar--;
+		} else
+			ret = reg(cp, 1, &flags);
 		if (ret == NULL)
 			return(NULL);
 		*flagp |= flags&(HASWIDTH|SPSTART);
