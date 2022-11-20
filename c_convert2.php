@@ -23,6 +23,7 @@ class configclass{
 		'regcomp',
 		'regexec',
 		'regsub',
+		'case_insensitive',
 	);
 	
 };

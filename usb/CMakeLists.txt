@@ -6,29 +6,37 @@ include(pico_sdk_import.cmake)
 project(lcd-lib C CXX ASM)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
+set(PICO_NO_FLASH 1)
+set(ENABLE_USB_UART 0)
 
 # Initialize the SDK
 pico_sdk_init()
 
-if (TARGET tinyusb_device)
-	add_executable(hello_usb
-			hello_usb.c
-			machikania.c
-			test.c
-			regsub.c
-			regexp.c
-		)
+set(ENV_TARGET regexp02)
+set(ENV_LINKER_SCRIPT memmap_no_flash_02.ld)
+include(CMakeListsSub.txt)
 
-	# Pull in our pico_stdlib which aggregates commonly used features
-	target_link_libraries(hello_usb pico_stdlib)
+set(ENV_TARGET regexp04)
+set(ENV_LINKER_SCRIPT memmap_no_flash_04.ld)
+#include(CMakeListsSub.txt)
 
-	# enable usb output, disable uart output
-	pico_enable_stdio_usb(hello_usb 1)
-	pico_enable_stdio_uart(hello_usb 0)
+set(ENV_TARGET regexp08)
+set(ENV_LINKER_SCRIPT memmap_no_flash_08.ld)
+#include(CMakeListsSub.txt)
 
-	# create map/bin/hex/uf2 file etc.
-	pico_add_extra_outputs(hello_usb)
-	
-elseif(PICO_ON_DEVICE)
-	message(WARNING "not building hello_usb because TinyUSB submodule is not initialized in the SDK")
-endif()
+set(ENV_TARGET regexp0c)
+set(ENV_LINKER_SCRIPT memmap_no_flash_0c.ld)
+#include(CMakeListsSub.txt)
+
+set(ENV_TARGET regexp10)
+set(ENV_LINKER_SCRIPT memmap_no_flash_10.ld)
+#include(CMakeListsSub.txt)
+
+set(ENV_TARGET regexp18)
+set(ENV_LINKER_SCRIPT memmap_no_flash_18.ld)
+#include(CMakeListsSub.txt)
+
+set(ENV_TARGET regexp20)
+set(ENV_LINKER_SCRIPT memmap_no_flash_20.ld)
+#include(CMakeListsSub.txt)
+

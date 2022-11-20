@@ -1,4 +1,5 @@
 #include "machikania.h"
+#include "pico/stdlib.h"
 
 int* g_r5_8[4];
 
@@ -18,12 +19,12 @@ int machikania_lib(int r0, int r1, int r2, int r3){
 	return f(r0,r1,r2,r3);
 }
 
-void* machikania_malloc(int bytes){
+void* machikania_malloc(size_t bytes){
 	return (void*) machikania_lib(251,bytes,0,LIB_SYSTEM);
 }
 
-void* machikania_calloc(int bytes){
-	return (void*) machikania_lib(250,bytes,0,LIB_SYSTEM);
+void* machikania_calloc(size_t nums, size_t size){
+	return (void*) machikania_lib(250,nums*size,0,LIB_SYSTEM);
 }
 
 void machikania_free(void* addr){
@@ -65,4 +66,20 @@ void printhex16(int val){
 
 void printhex32(int val){
 	_printhex(val,8);
+}
+
+void blink(int num){
+	int i;
+	asm("cpsid i");
+	gpio_init(PICO_DEFAULT_LED_PIN);
+	gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
+	while (true) {
+		for(i=0;i<num;i++){
+			gpio_put(PICO_DEFAULT_LED_PIN, 1);
+			busy_wait_ms(250);
+			gpio_put(PICO_DEFAULT_LED_PIN, 0);
+			busy_wait_ms(250);
+		}
+		busy_wait_ms(500);
+	}
 }

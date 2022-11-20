@@ -1,12 +1,12 @@
 /*
  * regcomp and regexec -- regsub and regerror are elsewhere
  */
+#include "machikania.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "regexp.h"
 #include "regmagic.h"
-#include "machikania.h"
 
 /*
  * The "internal use only" fields in regexp.h are present to pass info from
@@ -166,7 +166,6 @@ const char *exp;
 	register char *scan;
 	int flags;
 	struct comp co;
-
 	if (exp == NULL)
 		FAIL("NULL argument to regcomp");
 
@@ -427,7 +426,7 @@ int *flagp;
  * faster to run.  Backslashed characters are exceptions, each becoming a
  * separate node; the code is simpler that way and it's not worth fixing.
  */
-static char *
+static char * __attribute__((noinline))
 regatom(cp, flagp)
 register struct comp *cp;
 int *flagp;

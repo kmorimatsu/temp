@@ -1,4 +1,10 @@
+#include <stddef.h>
 
+/*
+	To get HEX file for embedding to MachiKania, enable MACHIKANIA definition.
+	Also set(ENABLE_USB_UART 0) in CMakeLists.txt
+	For testing by USB UART, disable MACHIKANIA and set(ENABLE_USB_UART 1). 
+*/
 #define MACHIKANIA
 
 extern int* g_r5_8[4];
@@ -8,21 +14,24 @@ extern int* g_r5_8[4];
 #define g_r8 g_r5_8[3];
 
 void machikania_init(void);
-void* machikania_malloc(int bytes);
-void* machikania_calloc(int bytes);
+void* machikania_malloc(size_t bytes);
+void* machikania_calloc(size_t nums, size_t size);
 void machikania_free(void* addr);
 void machikania_exit(int num);
+void* machikania_memmove(void* buf1, void* buf2, size_t n);
+void* machikania_memset(void *buf, int ch, size_t n);
 void printstr(char* str);
 void printint(int val);
 void printhex(int val);
 void printhex8(int val);
 void printhex16(int val);
 void printhex32(int val);
+void blink(int num);
 
 #ifdef MACHIKANIA
 
 #define malloc(a) machikania_malloc(a)
-#define calloc(a) machikania_calloc(a)
+#define calloc(a,b) machikania_calloc(a,b)
 #define free(a) machikania_free(a)
 #define exit(a) machikania_exit(a)
 

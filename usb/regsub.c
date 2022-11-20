@@ -1,13 +1,13 @@
 /*
  * regsub
  */
+#include "machikania.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include "regexp.h"
 #include "regmagic.h"
-#include "machikania.h"
 
 /*
  - regsub - perform substitutions after a regexp match
