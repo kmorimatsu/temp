@@ -114,7 +114,7 @@ char* support_curly_sub(char* str,char endc, char** pres){
 	char* begin=str;
 	char* end=str;
 	char c;
-	int min,max,i;
+	int min,max,i,j;
 	while(c=(res++)[0]=(str++)[0]){
 		if (c==endc) break;
 		if ('{'!=c) begin=str-1;
@@ -131,11 +131,36 @@ char* support_curly_sub(char* str,char endc, char** pres){
 			case '{':
 				res--;
 				end=str-1;
-				min=atoi(str);
-				while('}'!=(str++)[0]);
-				while(0<(--min)){
-					for(i=0;begin+i<end;i++) (res++)[0]=begin[i];
+				max=min=atoi(str);
+				while('}'!=(c=(str++)[0])){
+					if (c<'0' || '9'<c) break;
 				}
+				if (','==c) {
+					max=atoi(str);
+					while('}'!=(c=(str++)[0])){
+						if (c<'0' || '9'<c) break;
+					}
+				}
+				if ('}'!=c) regerror("{ } error");
+				if (min==max) {
+					while(0<(--min)){
+						for(i=0;begin+i<end;i++) (res++)[0]=begin[i];
+					}
+				} else if (min<max) {
+					//regerror("not supported yet");
+					res-=end-begin;
+					(res++)[0]='(';
+					(res++)[0]='?';
+					(res++)[0]=':';
+					while(min<=max){
+						for(j=0;j<min;j++){
+							for(i=0;begin+i<end;i++) (res++)[0]=begin[i];
+						}
+						if (min<max) (res++)[0]='|';
+						else (res++)[0]=')';
+						min++;
+					}
+				} else regerror("{ } error");
 				continue;
 			default:
 				continue;
