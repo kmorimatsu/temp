@@ -60,6 +60,7 @@ int main() {
 
 	machikania_init();
 	free(case_insensitive("tes\\[t[a-f\\]G-H][abc0-9]"));
+	free(support_curly("[a-z]{8}"));
 
 	stdio_init_all();
 	sleep_ms(3000);

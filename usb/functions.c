@@ -83,3 +83,64 @@ char* case_insensitive(char* str){
 	}
 	return ret;
 }
+
+char* support_curly_sub(char* str,char endc, char** res);
+char* support_curly(char* str){
+	int len=strlen(str);
+	volatile int max=1; // Don't know why "volatile" is needed in "if (max<a) max=a;"
+	int i,a;
+	char c=0;
+	// Get the max number
+	for(i=0;i<len;i++){
+		if ('\\'==str[i]) {
+			i++;
+			continue;
+		}
+		if ('{'!=str[i]) continue;
+		a=atoi(str+i+1);
+		if (max<a) max=a;
+	}
+	// Allocate memory
+	char* ret=calloc(len*max+1,1);
+	char* res=ret;
+	if (!ret) regerror("malloc error");
+	// Compile
+	support_curly_sub(str,0,&res);
+	return ret;
+}
+
+char* support_curly_sub(char* str,char endc, char** pres){
+	char* res=(char*)(*pres);
+	char* begin=str;
+	char* end=str;
+	char c;
+	int min,max,i;
+	while(c=(res++)[0]=(str++)[0]){
+		if (c==endc) break;
+		if ('{'!=c) begin=str-1;
+		switch(c){
+			case '\\':
+				(res++)[0]=(str++)[0];
+				continue;
+			case '(':
+				str=support_curly_sub(str,')',&res);
+				continue;
+			case '[':
+				str=support_curly_sub(str,']',&res);
+				continue;
+			case '{':
+				res--;
+				end=str-1;
+				min=atoi(str);
+				while('}'!=(str++)[0]);
+				while(0<(--min)){
+					for(i=0;begin+i<end;i++) (res++)[0]=begin[i];
+				}
+				continue;
+			default:
+				continue;
+		}
+	}
+	*pres=res;
+	return str;
+}
