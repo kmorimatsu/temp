@@ -3,32 +3,64 @@ static private C_CODE
 field RE,STR
 
 method INIT
-  var t,u
+  var t
   if not(C_CODE) then gosub INIT_C
-  t=args(1)
+  if args(0)<1 then return
+  t$=args$(1)+""
   if args(0)=2 then
-    if peek(args(2))=0x69 then t=gosub(C_CASE_INSENSITIVE,t)
+    if peek(args(2))=0x69 then t$=gosub$(C_CASE_INSENSITIVE,t$)
   endif
-  u=gosub(C_SUPPORT_CURLY,t)
-  RE=gosub(C_REGCOMP,u)
+  t$=gosub$(C_SUPPORT_CURLY,t$)
+  RE=gosub(C_REGCOMP,t$)
   delete t
-  delete u
 return
 
 method REGEXEC
   var t
   if args(0)=1 then
-    STR$=args$(1)
+    STR$=args$(1)+""
     return gosub(C_REGEXEC,RE,STR)
   else
     return gosub(C_REGEXEC,RE,RE(10))
   endif
 
 method MATCH
-  var t,l
+  var t
   t=RE(args(1))
-  l=RE(10+args(1))-t
-  return t$(0,l)
+  return t$(0,RE(10+args(1))-t)
+
+method REPLACE
+  var t,i,r
+  STR$=args$(1)
+  r$=""
+  t=STR
+  i=gosub(C_REGEXEC,RE,t)
+  do while i
+    r$=r$+t$(0,RE(0)-t)+args$(2)
+    t=RE(10)
+    i=gosub(C_REGEXEC,RE,t)
+  loop
+  STR$=r$+t$
+  return STR$
+
+method REPLACE_CALLBACK
+  var t,i,r
+  STR$=args$(1)
+  r$=""
+  t=STR
+  i=gosub(C_REGEXEC,RE,t)
+  do while i
+    r$=r$+t$(0,RE(0)-t)+gosub$(REPLACE_CALLBACK_SUB,RE,args(2))
+    t=RE(10)
+    i=gosub(C_REGEXEC,RE,t)
+  loop
+  STR$=r$+t$
+  return STR$
+
+label REPLACE_CALLBACK_SUB
+  REM 6931    ldr r1, [r6, #16]
+  REM 4708    bx r1
+  exec $6931,$4708
 
 label INIT_C
   var A,V
