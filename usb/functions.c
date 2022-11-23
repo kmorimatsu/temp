@@ -5,6 +5,10 @@
 #include "regexp.h"
 #include "pico/stdlib.h"
 
+// Local prototypes
+char* get_curly_nums(char* str, int* min, int* max);
+char* support_curly_sub(char* str,char endc, char** res);
+
 char* case_insensitive(char* str){
 	int len=strlen(str);
 	int max=len*4+5;
@@ -84,29 +88,57 @@ char* case_insensitive(char* str){
 	return ret;
 }
 
-char* support_curly_sub(char* str,char endc, char** res);
 char* support_curly(char* str){
 	int len=strlen(str);
-	volatile int max=1; // Don't know why "volatile" is needed in "if (max<a) max=a;"
-	int i,a;
-	char c=0;
+	char* str2=str;
+	volatile int max=1; // Don'y know why "volatile" is required for the line, "if (max<b) max=b;".
+	int i,a,b;
+	int cnum=0;
 	// Get the max number
-	for(i=0;i<len;i++){
-		if ('\\'==str[i]) {
-			i++;
-			continue;
+	while(1){
+		switch((str++)[0]){
+			case 0:
+				break;
+			case '\\':
+				str++;
+				continue;
+			case '{':
+				cnum++;
+				str=get_curly_nums(str,&a,&b);
+				if (max<b) max=b;
+				continue;
+			default:
+				continue;
 		}
-		if ('{'!=str[i]) continue;
-		a=atoi(str+i+1);
-		if (max<a) max=a;
+		break;
 	}
 	// Allocate memory
-	char* ret=calloc(len*max+1,1);
+	// Longest case is like "[a-z]{2,4}" => "(?:[a-z][a-z]|[a-z][a-z][a-z]|[a-z][a-z][a-z][a-z])"
+	// Therefore, allocate memory with bytes of "(len+1)*max+cnum*3+1"
+	// , where "(len+1)" is for '|' or ')' and "cnum*3" is for "(?:"
+	char* ret=calloc((len+1)*max+cnum*3+1,1);
 	char* res=ret;
-	if (!ret) regerror("malloc error");
 	// Compile
-	support_curly_sub(str,0,&res);
+	support_curly_sub(str2,0,&res);
 	return ret;
+}
+
+char* get_curly_nums(char* str, int* min, int* max){
+	*min=strtol(str,&str,10);
+	switch((str++)[0]){
+		case '}':
+			*max=*min;
+			break;
+		case ',':
+			*max=strtol(str,&str,10);
+			if ('}'!=(str++)[0]) *max=*min-1;
+			break;
+		default:
+			*max=*min-1;
+			break;
+	}
+	if (*max<*min) regerror("{ } error");
+	return str;
 }
 
 char* support_curly_sub(char* str,char endc, char** pres){
@@ -131,23 +163,14 @@ char* support_curly_sub(char* str,char endc, char** pres){
 			case '{':
 				res--;
 				end=str-1;
-				max=min=atoi(str);
-				while('}'!=(c=(str++)[0])){
-					if (c<'0' || '9'<c) break;
-				}
-				if (','==c) {
-					max=atoi(str);
-					while('}'!=(c=(str++)[0])){
-						if (c<'0' || '9'<c) break;
-					}
-				}
-				if ('}'!=c) regerror("{ } error");
+				str=get_curly_nums(str,&min,&max);
 				if (min==max) {
+					// {num} expression
 					while(0<(--min)){
 						for(i=0;begin+i<end;i++) (res++)[0]=begin[i];
 					}
-				} else if (min<max) {
-					//regerror("not supported yet");
+				} else {
+					// {min,max} expression
 					res-=end-begin;
 					(res++)[0]='(';
 					(res++)[0]='?';
@@ -160,7 +183,7 @@ char* support_curly_sub(char* str,char endc, char** pres){
 						else (res++)[0]=')';
 						min++;
 					}
-				} else regerror("{ } error");
+				}
 				continue;
 			default:
 				continue;
