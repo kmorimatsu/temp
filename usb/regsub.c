@@ -1,6 +1,7 @@
 /*
  * regsub
  */
+// Inserted 1 line for MachiKania
 #include "machikania.h"
 #include <stdio.h>
 #include <stdlib.h>

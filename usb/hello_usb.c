@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "machikania.h"
-#include "functions.h"
 #include <stdio.h>
 #include "pico/stdlib.h"
 #include <stdlib.h>
 #include "regexp.h"
+#include "machikania.h"
+#include "functions.h"
 
 char buf[BUFSIZ];
 
@@ -43,7 +43,7 @@ void regerror(char *s){
 	if (errreport)
 		errseen = s;
 	else
-		error(s, "");
+		error(s, g_exptest);
 }
 
 char* test(int pos, char c);
@@ -59,8 +59,7 @@ int main() {
 	};
 
 	machikania_init();
-	free(case_insensitive("tes\\[t[a-f\\]G-H][abc0-9]"));
-	free(support_curly("[a-z]{8}"));
+	free(precomp("tes\\[t[a-f\\]G-H][abc0-9].","is"));
 
 	stdio_init_all();
 	sleep_ms(3000);

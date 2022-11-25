@@ -15,17 +15,17 @@ class configclass{
 	public $dis_file='./build/regexp02.dis';
 	public $map_file='./build/regexp02.elf.map';
 	public $hex_file='./build/regexp02.hex';
-	public $debug_file='./machikap/machikap.bas';
+	public $debug_file='./machikap/regexp.bas';
+	public $debug_hex='./machikap/regexp02.hex';
 	
 	// Functions to be exported
 	public $functions=array(
 		'machikania_init',
+		'precomp',
 		'regcomp',
 		'regexec',
 		'regsub',
-		'case_insensitive',
 	);
-	
 };
 
 /*
@@ -189,4 +189,7 @@ if (isset($o->config->debug_file)) {
 	$result=substr($result,0,strpos($result,'label INIT_C'));
 	$result.=substr($o->code,strpos($o->code,'label INIT_C'));
 	file_put_contents($o->config->debug_file,$result);
+}
+if (isset($o->config->debug_hex)) {
+	file_put_contents($o->config->debug_hex,file_get_contents($o->config->hex_file));
 }

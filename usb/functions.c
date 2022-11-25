@@ -1,15 +1,16 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "machikania.h"
 #include "regexp.h"
 #include "pico/stdlib.h"
+#include "machikania.h"
+#include "functions.h"
 
 // Local prototypes
 char* get_curly_nums(char* str, int* min, int* max);
 char* support_curly_sub(char* str,char endc, char** res);
 
-char* case_insensitive(char* str){
+char* __attribute__((noinline)) case_insensitive(char* str){
 	int len=strlen(str);
 	int max=len*4+5;
 	char* ret=calloc(max,1);
@@ -88,7 +89,7 @@ char* case_insensitive(char* str){
 	return ret;
 }
 
-char* support_curly(char* str){
+char* __attribute__((noinline)) support_curly(char* str){
 	int len=strlen(str);
 	char* str2=str;
 	volatile int max=1; // Don'y know why "volatile" is required for the line, "if (max<b) max=b;".
@@ -176,12 +177,12 @@ char* support_curly_sub(char* str,char endc, char** pres){
 					(res++)[0]='?';
 					(res++)[0]=':';
 					while(min<=max){
-						for(j=0;j<min;j++){
+						for(j=0;j<max;j++){
 							for(i=0;begin+i<end;i++) (res++)[0]=begin[i];
 						}
 						if (min<max) (res++)[0]='|';
 						else (res++)[0]=')';
-						min++;
+						max--;
 					}
 				}
 				continue;
@@ -191,4 +192,81 @@ char* support_curly_sub(char* str,char endc, char** pres){
 	}
 	*pres=res;
 	return str;
+}
+
+char* __attribute__((noinline)) support_non_s(char* str){
+	int len=strlen(str);
+	// "." => "[^\r\n]" conversion
+	char* ret=calloc(len*5+1,1);
+	char* res=ret;
+	while(1){
+		switch((res++)[0]=(str++)[0]){
+			case '\\':
+				(res++)[0]=(str++)[0];
+				continue;
+			case '.':
+				res--;
+				(res++)[0]='[';
+				(res++)[0]='^';
+				(res++)[0]='\r';
+				(res++)[0]='\n';
+				(res++)[0]=']';
+				continue;
+			case 0:
+				break;
+			default:
+				continue;
+		}
+		break;
+	}
+	return ret;
+}
+
+volatile int g_options;
+void set_options(char* str){
+	int op=0;
+	while(1){
+		switch((str++)[0]){
+			case 'i':
+				op|=OPTION_LI;
+				continue;
+			case 's':
+				op|=OPTION_LS;
+				continue;
+			case 'm':
+				op|=OPTION_LM;
+				continue;
+			case 0:
+				break;
+			default:
+				continue;
+		}
+		break;
+	}
+	g_options=op;
+}
+
+int get_option(int option){
+	return (g_options & option) ? 1:0;
+}
+
+char* g_exptest;
+char* precomp(char* re, char* options){
+	char* ret;
+	char* re2=0;
+	set_options(options);
+	// Support "i" option
+	if (get_option(OPTION_LI)) re=re2=case_insensitive(re);
+	// Support "s" option
+	if (!get_option(OPTION_LS)) {
+		re=support_non_s(re);
+		if (re2) free(re2);
+		re2=re;
+	}
+	// Support "{ }"
+	ret=support_curly(re);
+	if (re2) free(re2);
+	free(re);
+	g_exptest=ret;
+	return ret;
 }
