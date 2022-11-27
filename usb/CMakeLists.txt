@@ -8,6 +8,7 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 set(PICO_NO_FLASH 1)
 set(ENABLE_USB_UART 0)
+add_definitions(-O0)
 
 # Initialize the SDK
 pico_sdk_init()

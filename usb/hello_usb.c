@@ -53,9 +53,9 @@ int main() {
 	int argc=4;
 	char* argv[]={
 		"programname",
-		"(sim)([a-z]le)",
-		"a very simple simple simple string",
-		"tESt",
+		"^(.)[a-z]",
+		"This is a very simple simple simple string",
+		"$0 - $1",
 	};
 
 	machikania_init();

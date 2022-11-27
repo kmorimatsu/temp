@@ -10,7 +10,7 @@
 char* get_curly_nums(char* str, int* min, int* max);
 char* support_curly_sub(char* str,char endc, char** res);
 
-char* __attribute__((noinline)) case_insensitive(char* str){
+char* case_insensitive(char* str){
 	int len=strlen(str);
 	int max=len*4+5;
 	char* ret=calloc(max,1);
@@ -89,7 +89,7 @@ char* __attribute__((noinline)) case_insensitive(char* str){
 	return ret;
 }
 
-char* __attribute__((noinline)) support_curly(char* str){
+char* support_curly(char* str){
 	int len=strlen(str);
 	char* str2=str;
 	volatile int max=1; // Don'y know why "volatile" is required for the line, "if (max<b) max=b;".
@@ -194,7 +194,7 @@ char* support_curly_sub(char* str,char endc, char** pres){
 	return str;
 }
 
-char* __attribute__((noinline)) support_non_s(char* str){
+char* support_non_s(char* str){
 	int len=strlen(str);
 	// "." => "[^\r\n]" conversion
 	char* ret=calloc(len*5+1,1);
