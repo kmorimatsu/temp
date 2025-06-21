@@ -85,16 +85,27 @@ void usbkb_polling(void){
 	unsigned char current_vkey;
 	int ret;
 	if (0==s_write_or_read) {
-		// Write command to I2C keyboard
 		s_write_or_read=1;
+		// Write command to I2C keyboard
 		buff[0]=0x09;
-		i2c_write_blocking(MACHIKANIA_PC_I2C_KBD_MOD,MACHIKANIA_PC_I2C_KBD_ADDR,&buff[0],1,false);
+		ret=i2c_write_blocking(MACHIKANIA_PC_I2C_KBD_MOD,MACHIKANIA_PC_I2C_KBD_ADDR,&buff[0],1,false);
+		if (ret<0) {
+			// Error occurred.
+			// Reset I2C for keyboard and do it again
+			usbkb_init();
+			s_write_or_read=0;
+		}
 		return;
 	} else {
 		s_write_or_read=0;
 		// Read data from I2C keyboard
 		ret=i2c_read_blocking(MACHIKANIA_PC_I2C_KBD_MOD,MACHIKANIA_PC_I2C_KBD_ADDR,&buff[0],2,false);
-		if (ret<0) return; // An error
+		if (ret<0) {
+			// Error occurred.
+			// Reset I2C for keyboard and do it again
+			usbkb_init();
+			return;
+		}
 	}
 	// Data reading succeeded
 	current_vkey=g_i2c_to_vkey[buff[1]];

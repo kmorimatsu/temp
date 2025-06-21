@@ -3,16 +3,16 @@
 
 	Peripheral assignment
 
-	GP0 I/O bit0 / PWM3 / button1 (UP)
-	GP1 I/O bit1 / PWM2 / button2 (LEFT)
+	GP0 I/O bit0 / PWM3 / I2C SDA / button1 (UP)
+	GP1 I/O bit1 / PWM2 / I2C SCL / button2 (LEFT)
 	GP2 I/O bit2 / PWM1 / button3 (RIGHT)
 	GP3 I/O bit3 / SPI CS / button4 (DOWN)
 	GP4 I/O bit4 / UART TX / button5 (START)
 	GP5 I/O bit5 / UART RX / button6 (FIRE)
-	GP6 I/O bit6 / I2C SDA
-	GP7 I/O bit7 / I2C SCL
-	GP8 I/O bit8
-	GP9 I/O bit9
+	GP6 I2C1_SDA (Keyboard)
+	GP7 I2C1_SCL (Keyboard)
+	GP8 I/O bit6 / I/O bit8
+	GP9 I/O bit7 / I/O bit9
 	GP10 SPI1_SCK（LCD）
 	GP11 SPI1_TX（LCD）
 	GP12 SPI1_RX（LCD）
@@ -34,14 +34,14 @@
 
 //                     31     24      16       8       0
 //                      |      |       |       |       |
-#define GPIO_ALL_MASK 0b00011100011100000000001111111111
+#define GPIO_ALL_MASK 0b00011100011100000000001100111111
 
 // IO settings
 #define IO_SPI_CS 3
 #define IO_SPI_SSPCR0 ((volatile unsigned int*)(SPI0_BASE + SPI_SSPCR0_OFFSET))
-#define IO_I2C_SDA 6
-#define IO_I2C_SCL 7
-#define IO_I2C_CH i2c1
+#define IO_I2C_SDA 0
+#define IO_I2C_SCL 1
+#define IO_I2C_CH i2c0
 #define IO_PWM1 2
 #define IO_PWM2 1
 #define IO_PWM3 0
@@ -65,8 +65,8 @@
 #define IO_GPIO3  3
 #define IO_GPIO4  4
 #define IO_GPIO5  5
-#define IO_GPIO6  6
-#define IO_GPIO7  7
+#define IO_GPIO6  8
+#define IO_GPIO7  9
 #define IO_GPIO8  8
 #define IO_GPIO9  9
 #define IO_GPIO10 20
