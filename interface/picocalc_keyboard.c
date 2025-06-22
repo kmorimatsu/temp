@@ -2,7 +2,7 @@
 
 Copyright (C) 2025, Katsumi, all right reserved.
 
-This program supplied herewith by KenKen is free software; you can
+This program supplied herewith by Katsumi is free software; you can
 redistribute it and/or modify it under the terms of the same license written
 here and only for non-commercial purpose.
 
