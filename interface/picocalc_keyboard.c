@@ -56,6 +56,11 @@ static const uint8_t g_i2c_to_vkey[]={
 	0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, // 0xF0-0xFF
 };
 
+void usbkb_release_all(void){
+	unsigned int* p_keystatus=(unsigned int*)&usbkb_keystatus[0];
+	for(int i=0;i<64;i++) p_keystatus[i]=0;
+}
+
 bool usbkb_init(void){
 	// Initialice I2C system
 	gpio_set_function(MACHIKANIA_PC_I2C_KBD_SCL, GPIO_FUNC_I2C);
@@ -67,7 +72,7 @@ bool usbkb_init(void){
 	keytype=1;
 	// Initialize buffer
 	keycodebufp1=keycodebufp2=keycodebuf;
-	for(int i=0;i<256;i++) usbkb_keystatus[i]=0;
+	usbkb_release_all();
 	return true;
 }
 
@@ -166,9 +171,7 @@ void usbkb_polling(void){
 			// All keys are released
 			if (0x00==s_prev_vkey) {
 				s_null_count++;
-				/*if (50==s_null_count) {
-					for(int i=0;i<256;i++) usbkb_keystatus[i]=0;
-				}//*/
+				if (50==s_null_count) usbkb_release_all();
 			} else {
 				s_null_count=0;
 			}
