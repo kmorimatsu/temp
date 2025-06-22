@@ -1,5 +1,6 @@
 # phyllosoma
-MachiKania Phyllosoma for PicoCalc
+MachiKania Phyllosoma for PicoCalc  
+![photo.png](photo.png)
 
 ## MachiKania Phyllosoma
 MachiKania Phyllosoma is a BASIC compiler for ARMv6-M, especially for Raspberry Pi Pico.
