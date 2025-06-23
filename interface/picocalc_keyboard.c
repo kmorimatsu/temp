@@ -20,11 +20,24 @@ caused by using this program.
 #include "usbkeyboard.h"
 #include "../compiler.h"
 
+/*
+	Keyboard-I2C settings follow
+	Note that the baud-rate can be as fast as 250 kHz, but use 10 kHz here.
+	As the usbkb_polling() function is executed by second CPU core,
+	the slower I2C communication does not affect execution of BASIC code very much.
+	The BASIC code execution speed at 10 kHz I2C baud-rate is 99.99% of that at 250 kHz.
+	The I2C-keyboard function at 10 kHz occupies 12 % power of second CPU core.
+*/
+
 #define MACHIKANIA_PC_I2C_KBD_MOD i2c1
 #define MACHIKANIA_PC_I2C_KBD_SDA 6
 #define MACHIKANIA_PC_I2C_KBD_SCL 7
-#define MACHIKANIA_PC_I2C_KBD_SPEED  250000
+#define MACHIKANIA_PC_I2C_KBD_SPEED  10000
 #define MACHIKANIA_PC_I2C_KBD_ADDR 0x1F
+
+/*
+	Machikania global variables follow
+*/
 
 volatile uint8_t usbkb_keystatus[256]; // 仮想コードに相当するキーの状態（Onの時1）
 uint16_t vkey; // usbkb_readkey()関数でセットされるキーコード、上位8ビットはシフト関連キー
@@ -35,8 +48,11 @@ uint16_t keycodebuf[KEYCODEBUFSIZE]; //キーコードバッファ
 uint16_t * volatile keycodebufp1; //キーコード書き込み先頭ポインタ
 uint16_t * volatile keycodebufp2; //キーコード読み出し先頭ポインタ
 
-static char g_shift_status=0;
+/*
+	Static global variables follow
+*/
 
+static char g_shift_status=0;
 static const uint8_t g_i2c_to_vkey[]={
 	// 0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F
 	0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x08,0x09,0x0D,0x00,0x00,0x00,0x00,0x00, // 0x00-0x0F
