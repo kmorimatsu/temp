@@ -67,6 +67,6 @@ The phyllosoma_kb.uf2 firmware supports using the built-in keyboard of PicoCalc.
 The four arrow keys and space/enter keys of keyboard emulate button functions of MachiKania. To change the assignment (which keys are used for which button), edit MACHIKAP.INI (EMULATEBUTTONxx=yyy etc) 
 
 ## LCD settings
-To use correct direction of LCD, set "VERTICAL" in MACHIKAP.INI.
+To use correct direction of LCD, set "VERTICAL" in MACHIKAP.INI. The "LCDINVERT" is also required for correct colorings.
 
 

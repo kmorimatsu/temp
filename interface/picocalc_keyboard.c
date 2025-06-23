@@ -18,6 +18,7 @@ caused by using this program.
 #include "pico/stdlib.h"
 #include "hardware/i2c.h"
 #include "usbkeyboard.h"
+#include "../compiler.h"
 
 #define MACHIKANIA_PC_I2C_KBD_MOD i2c1
 #define MACHIKANIA_PC_I2C_KBD_SDA 6
@@ -86,9 +87,15 @@ void usbkb_polling(void){
 	static char s_caps_lock=0;
 	static char s_write_or_read=0;
 	static unsigned char s_null_count=0;
+	static int s_clock_hz=0;
 	unsigned char buff[2];
 	unsigned char current_vkey;
 	int ret;
+	if (g_clock_hz!=s_clock_hz) {
+		// CPU clock has been changed
+		if (0!=s_clock_hz) i2c_init(MACHIKANIA_PC_I2C_KBD_MOD, MACHIKANIA_PC_I2C_KBD_SPEED);
+		s_clock_hz=g_clock_hz;
+	}
 	if (0==s_write_or_read) {
 		s_write_or_read=1;
 		// Write command to I2C keyboard
